@@ -5,231 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AlterEgo | 第二人生</title>
     
-    <!-- PWA 配置 -->
-    <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png"> <!-- 如果没有icon可忽略，不影响运行 -->
-    
-    <!-- === 社交裂变核心 (Open Graph) === -->
-    <!-- 当您将链接发给朋友或朋友圈时，会显示下面的信息 -->
+    <!-- 社交裂变核心 (Open Graph) -->
     <meta property="og:title" content="AlterEgo | 只有1%的人敢看另一个自己">
     <meta property="og:description" content="如果人生能重来，你会是谁？Sora 正在生成你的平行宇宙纪录片... [点击查看]">
-    <meta property="og:image" content="https://jinv2.github.io/alterego/bg.jpg"> <!-- 必须上传 bg.jpg 到仓库 -->
+    <!-- 强制使用绝对路径，确保分享卡片一定有图 -->
+    <meta property="og:image" content="https://jinv2.github.io/alterego/bg.jpg">
     <meta property="og:url" content="https://jinv2.github.io/alterego/">
     <meta property="og:type" content="website">
     
-    <!-- Twitter 卡片 -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AlterEgo | 重启你的人生">
-    <meta name="twitter:description" content="输入你的遗憾，AI为你生成另一个版本的生命。">
-    <meta name="twitter:image" content="https://jinv2.github.io/alterego/bg.jpg">
-
-    <!-- 字体库：电影感 -->
+    <!-- 字体库 -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --neon-blue: #00f3ff;
             --neon-red: #ff003c;
-            --glass-bg: rgba(20, 20, 20, 0.6);
-            --border-color: rgba(255, 255, 255, 0.15);
+            --glass-bg: rgba(20, 20, 20, 0.7);
+            --border-color: rgba(255, 255, 255, 0.2);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
+            margin: 0; padding: 0; height: 100%;
             font-family: 'Montserrat', sans-serif;
-            background-color: #000;
-            color: #fff;
-            overflow: hidden;
+            background-color: #000; /* 如果图片加载失败，显示黑色 */
+            color: #fff; overflow: hidden;
         }
 
-        /* 背景层：支持 bg.jpg，如果没有则使用在线备用图 */
+        /* 背景层：修正路径逻辑 */
         .bg-layer {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('./bg.jpg'), url('https://images.unsplash.com/photo-1535868463750-c78d9543614f?q=80&w=2676&auto=format&fit=crop');
+            top: 0; left: 0; width: 100%; height: 100%;
+            
+            /* 1. 移除了 ./ 写法，直接用文件名 */
+            /* 2. 移除了备用图，强制只加载您的图 */
+            /* 3. 如果您上传的文件名是 bg.JPG 或 bg.jpeg，请在这里修改！Linux区分大小写！ */
+            background-image: url('bg.jpg'); 
+            
             background-size: cover;
             background-position: center;
-            filter: brightness(0.3) blur(2px);
+            filter: brightness(0.5); /* 稍微调暗，保证文字清晰 */
             z-index: -2;
-            transition: transform 3s ease, filter 1s ease;
         }
 
-        /* 扫描线特效：增加科技感 */
+        /* 扫描线 */
         .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-            background-size: 100% 4px;
-            z-index: -1;
-            pointer-events: none;
+            background-size: 100% 4px; z-index: -1; pointer-events: none;
         }
 
         /* 主容器 */
         .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            padding: 24px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100%; padding: 24px; text-align: center; position: relative; z-index: 1;
         }
 
-        /* 标题区 */
         h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 2.8rem;
-            letter-spacing: 6px;
-            margin: 0 0 10px 0;
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
+            font-family: 'Cinzel', serif; font-size: 2.8rem; letter-spacing: 6px;
+            margin: 0 0 10px 0; text-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
             animation: textFlicker 4s infinite;
         }
 
         p.subtitle {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            letter-spacing: 3px;
-            margin-bottom: 50px;
-            text-transform: uppercase;
+            font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 3px; margin-bottom: 50px; text-transform: uppercase;
         }
 
-        /* 交互面板 */
         .panel {
-            width: 100%;
-            max-width: 380px;
+            width: 100%; max-width: 380px;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 2px; /* 硬朗的赛博风格 */
-            padding: 30px 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s ease;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 2px;
+            padding: 30px 25px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
         label {
-            display: block;
-            text-align: left;
-            font-size: 0.75rem;
-            color: var(--neon-blue);
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-            font-weight: 600;
+            display: block; text-align: left; font-size: 0.75rem; color: var(--neon-blue);
+            margin-bottom: 8px; letter-spacing: 1px; font-weight: 600;
         }
 
         input[type="text"] {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #333;
-            border-left: 3px solid #555;
-            color: white;
-            padding: 12px;
-            font-size: 1rem;
-            outline: none;
-            margin-bottom: 25px;
-            font-family: 'Montserrat', sans-serif;
-            transition: 0.3s;
+            width: 100%; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333; border-left: 3px solid #555;
+            color: white; padding: 12px; font-size: 1rem; outline: none;
+            margin-bottom: 25px; font-family: 'Montserrat', sans-serif; transition: 0.3s;
         }
 
         input[type="text"]:focus {
-            border-left: 3px solid var(--neon-blue);
-            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid var(--neon-blue); background: rgba(0, 0, 0, 0.5);
         }
 
-        /* 故障风按钮 */
         .btn-core {
-            width: 100%;
-            padding: 16px;
-            background: transparent;
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: 4px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
+            width: 100%; padding: 16px; background: transparent;
+            border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700;
+            letter-spacing: 4px; cursor: pointer; position: relative; overflow: hidden;
+            transition: all 0.2s ease; text-transform: uppercase;
         }
 
         .btn-core::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--neon-blue);
-            z-index: -1;
-            transition: 0.4s;
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--neon-blue); z-index: -1; transition: 0.4s;
         }
 
-        .btn-core:hover {
-            color: #000;
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
-        }
+        .btn-core:hover { color: #000; box-shadow: 0 0 25px rgba(0, 243, 255, 0.4); }
+        .btn-core:hover::before { left: 0; }
 
-        .btn-core:hover::before {
-            left: 0;
-        }
-
-        .btn-core:active {
-            transform: scale(0.98);
-        }
-
-        /* 加载状态文字 */
         .status-log {
-            display: none;
-            margin-top: 25px;
-            font-size: 0.8rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.8);
-            font-family: 'Courier New', monospace;
-            text-align: left;
-            padding-left: 10px;
-            border-left: 2px solid var(--neon-red);
+            display: none; margin-top: 25px; font-size: 0.8rem; line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8); font-family: 'Courier New', monospace;
+            text-align: left; padding-left: 10px; border-left: 2px solid var(--neon-red);
         }
 
-        /* 底部版权 */
         .footer {
-            position: absolute;
-            bottom: 20px;
-            font-size: 0.6rem;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 2px;
+            position: absolute; bottom: 20px; font-size: 0.6rem;
+            color: rgba(255,255,255,0.3); letter-spacing: 2px;
         }
 
         @keyframes textFlicker {
-            0% { opacity: 0.9; }
-            5% { opacity: 0.5; }
-            10% { opacity: 0.9; }
-            50% { text-shadow: 0 0 25px rgba(0, 243, 255, 0.9); }
-            100% { opacity: 0.9; }
-        }
-
-        /* 适配极小屏幕 */
-        @media (max-height: 600px) {
-            h1 { font-size: 2rem; }
-            .panel { padding: 20px; }
-            p.subtitle { margin-bottom: 20px; }
+            0% { opacity: 0.9; } 5% { opacity: 0.5; } 10% { opacity: 0.9; }
+            50% { text-shadow: 0 0 25px rgba(0, 243, 255, 0.9); } 100% { opacity: 0.9; }
         }
     </style>
 </head>
@@ -245,9 +142,7 @@
         <div class="panel">
             <label>/// 设定你的平行人生 ///</label>
             <input type="text" id="dreamInput" placeholder="例如：如果我成为了职业赛车手..." autocomplete="off">
-            
             <button class="btn-core" onclick="startSequence()">INITIATE >></button>
-            
             <div class="status-log" id="statusLog">
                 [SYSTEM] 正在扫描视网膜...<br>
                 [CORE] 神经连接已建立...
@@ -258,10 +153,16 @@
     </div>
 
     <script>
-        // PWA 注册
+        // 【关键修改】移除了 Service Worker 注册代码
+        // 这将防止浏览器死死咬住旧文件不放
+        // 如果之前有缓存，我们需要通过 JS 强制注销它
+
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-            .catch(err => console.log('SW Load Fail', err));
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister(); // 强制注销旧的缓存策略
+                }
+            });
         }
 
         function startSequence() {
@@ -278,18 +179,16 @@
                 return;
             }
 
-            // 视觉反馈：锁定界面
             btn.innerHTML = "PROCESSING...";
             btn.style.opacity = "0.7";
-            btn.style.pointerEvents = "none"; // 禁止重复点击
+            btn.style.pointerEvents = "none";
             log.style.display = "block";
             
-            // 视觉特效：背景突变
+            // 背景动效
             bg.style.transform = "scale(1.2)";
-            bg.style.filter = "brightness(1.2) blur(0px) contrast(1.5)";
+            bg.style.filter = "brightness(1.0) blur(0px) contrast(1.2)";
             h1.style.textShadow = "0 0 30px var(--neon-red)";
 
-            // 模拟 Sora 生成过程的仪式感
             const messages = [
                 "[0%] 正在接入时间线节点 Alpha...",
                 "[24%] 正在提取潜意识碎片...",
@@ -302,9 +201,6 @@
             const interval = setInterval(() => {
                 if(step < messages.length) {
                     log.innerHTML += `<br>${messages[step]}`;
-                    // 自动滚动到底部
-                    // 简单的视觉抖动
-                    if(step === 2) bg.style.filter = "hue-rotate(90deg) contrast(1.5)";
                     step++;
                 } else {
                     clearInterval(interval);
@@ -316,7 +212,6 @@
         function finalize() {
             setTimeout(() => {
                 alert("【系统提示】\n\n您已获得内测资格。\n但在 MVP 演示阶段，我们需要您先分享此页面以解锁完整 4K 视频。");
-                // 恢复状态，形成闭环
                 location.reload();
             }, 1000);
         }
