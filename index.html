@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AlterEgo | 第二人生</title>
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <!-- 引入Google Fonts营造电影感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --deep-purple: #bc13fe;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden; /* 禁止滚动，沉浸式 */
+        }
+
+        /* 背景图层 */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 阁下请替换为您生成的 background.jpg */
+            background-image: url('https://images.unsplash.com/photo-1518544806352-a2286058e652?q=80&w=2662&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4) blur(3px); /* 压暗背景，突出文字 */
+            z-index: -1;
+            transition: all 1s ease;
+        }
+
+        /* 主容器 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            animation: pulse 3s infinite;
+        }
+
+        p.subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            color: #ccc;
+        }
+
+        /* 极简交互区 */
+        .input-group {
+            width: 100%;
+            max-width: 400px;
+            background: var(--glass-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #555;
+            color: white;
+            padding: 10px;
+            font-size: 1.1rem;
+            outline: none;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-bottom: 1px solid var(--neon-blue);
+        }
+
+        /* 核心按钮 */
+        .btn-glitch {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--deep-purple), #000);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .btn-glitch:hover {
+            box-shadow: 0 0 20px var(--neon-blue);
+            background: var(--neon-blue);
+            color: #000;
+        }
+
+        /* 模拟加载状态 */
+        .loader {
+            display: none;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; text-shadow: 0 0 30px rgba(0, 243, 255, 0.8); }
+            100% { opacity: 0.8; }
+        }
+
+        /* 版权 */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.6rem;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景层 -->
+    <div class="bg-layer" id="bg"></div>
+
+    <!-- 内容层 -->
+    <div class="container">
+        <h1>AlterEgo</h1>
+        <p class="subtitle">未 被 选 择 的 那 条 路</p>
+
+        <div class="input-group">
+            <label>如果当时，我选择了...</label>
+            <input type="text" id="dreamInput" placeholder="例如：成为一名赛车手">
+            
+            <button class="btn-glitch" onclick="generateDream()">重 启 人 生</button>
+            
+            <div class="loader" id="loader">
+                [系统正在介入时间线...]<br>
+                正在伪造记忆... 
+            </div>
+        </div>
+
+        <div class="footer">POWERED BY SORA | ARCHITECT: JINV2</div>
+    </div>
+
+    <script>
+        // 注册 Service Worker 实现 PWA 离线访问
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('Service Worker Registered'));
+        }
+
+        function generateDream() {
+            const input = document.getElementById('dreamInput').value;
+            const btn = document.querySelector('.btn-glitch');
+            const loader = document.getElementById('loader');
+            const bg = document.getElementById('bg');
+
+            if(!input) {
+                alert("请输入你想要重启的人生剧本...");
+                return;
+            }
+
+            // 模拟 API 调用与视觉反馈
+            btn.style.display = 'none';
+            loader.style.display = 'block';
+            
+            // 背景特效：模拟穿越虫洞
+            bg.style.filter = 'brightness(1.5) blur(0px) contrast(1.2)';
+            bg.style.transform = 'scale(1.1)';
+
+            setTimeout(() => {
+                loader.innerHTML = "平行宇宙链接建立成功。<br>视频正在生成 (模拟演示)...";
+                // 这里在真实产品中会跳转到视频播放页
+                setTimeout(() => {
+                    alert("【系统提示】\n这是MVP演示版。\n在真实版本中，此刻Sora生成的4K视频将开始播放。");
+                    location.reload(); // 重置
+                }, 3000);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+```
