@@ -4,17 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AlterEgo | 第二人生</title>
+    
+    <!-- PWA 配置 -->
     <meta name="theme-color" content="#000000">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
-    <!-- 引入Google Fonts营造电影感 -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="icon.png"> <!-- 如果没有icon可忽略，不影响运行 -->
+    
+    <!-- === 社交裂变核心 (Open Graph) === -->
+    <!-- 当您将链接发给朋友或朋友圈时，会显示下面的信息 -->
+    <meta property="og:title" content="AlterEgo | 只有1%的人敢看另一个自己">
+    <meta property="og:description" content="如果人生能重来，你会是谁？Sora 正在生成你的平行宇宙纪录片... [点击查看]">
+    <meta property="og:image" content="https://jinv2.github.io/alterego/bg.jpg"> <!-- 必须上传 bg.jpg 到仓库 -->
+    <meta property="og:url" content="https://jinv2.github.io/alterego/">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter 卡片 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AlterEgo | 重启你的人生">
+    <meta name="twitter:description" content="输入你的遗憾，AI为你生成另一个版本的生命。">
+    <meta name="twitter:image" content="https://jinv2.github.io/alterego/bg.jpg">
+
+    <!-- 字体库：电影感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --neon-blue: #00f3ff;
-            --deep-purple: #bc13fe;
-            --glass-bg: rgba(255, 255, 255, 0.05);
+            --neon-red: #ff003c;
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body, html {
@@ -24,23 +47,35 @@
             font-family: 'Montserrat', sans-serif;
             background-color: #000;
             color: #fff;
-            overflow: hidden; /* 禁止滚动，沉浸式 */
+            overflow: hidden;
         }
 
-        /* 背景图层 */
+        /* 背景层：支持 bg.jpg，如果没有则使用在线备用图 */
         .bg-layer {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* 阁下请替换为您生成的 background.jpg */
-            background-image: url('https://images.unsplash.com/photo-1518544806352-a2286058e652?q=80&w=2662&auto=format&fit=crop'); 
+            background-image: url('./bg.jpg'), url('https://images.unsplash.com/photo-1535868463750-c78d9543614f?q=80&w=2676&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
-            filter: brightness(0.4) blur(3px); /* 压暗背景，突出文字 */
+            filter: brightness(0.3) blur(2px);
+            z-index: -2;
+            transition: transform 3s ease, filter 1s ease;
+        }
+
+        /* 扫描线特效：增加科技感 */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
             z-index: -1;
-            transition: all 1s ease;
+            pointer-events: none;
         }
 
         /* 主容器 */
@@ -50,170 +85,240 @@
             justify-content: center;
             align-items: center;
             height: 100%;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
-            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 1;
         }
 
+        /* 标题区 */
         h1 {
             font-family: 'Cinzel', serif;
-            font-size: 3rem;
-            letter-spacing: 5px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-            animation: pulse 3s infinite;
+            font-size: 2.8rem;
+            letter-spacing: 6px;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.6);
+            animation: textFlicker 4s infinite;
         }
 
         p.subtitle {
-            font-size: 1rem;
-            opacity: 0.8;
-            margin-bottom: 40px;
-            letter-spacing: 2px;
-            color: #ccc;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 3px;
+            margin-bottom: 50px;
+            text-transform: uppercase;
         }
 
-        /* 极简交互区 */
-        .input-group {
+        /* 交互面板 */
+        .panel {
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             background: var(--glass-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 2px; /* 硬朗的赛博风格 */
+            padding: 30px 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
         }
 
         label {
             display: block;
             text-align: left;
-            margin-bottom: 10px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--neon-blue);
-            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         input[type="text"] {
-            width: 90%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #555;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-left: 3px solid #555;
             color: white;
-            padding: 10px;
-            font-size: 1.1rem;
+            padding: 12px;
+            font-size: 1rem;
             outline: none;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-family: 'Montserrat', sans-serif;
             transition: 0.3s;
         }
 
         input[type="text"]:focus {
-            border-bottom: 1px solid var(--neon-blue);
+            border-left: 3px solid var(--neon-blue);
+            background: rgba(0, 0, 0, 0.5);
         }
 
-        /* 核心按钮 */
-        .btn-glitch {
+        /* 故障风按钮 */
+        .btn-core {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, var(--deep-purple), #000);
+            padding: 16px;
+            background: transparent;
             border: 1px solid var(--neon-blue);
             color: var(--neon-blue);
             font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
             font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            transition: 0.3s;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
         }
 
-        .btn-glitch:hover {
-            box-shadow: 0 0 20px var(--neon-blue);
+        .btn-core::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background: var(--neon-blue);
+            z-index: -1;
+            transition: 0.4s;
+        }
+
+        .btn-core:hover {
             color: #000;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
         }
 
-        /* 模拟加载状态 */
-        .loader {
+        .btn-core:hover::before {
+            left: 0;
+        }
+
+        .btn-core:active {
+            transform: scale(0.98);
+        }
+
+        /* 加载状态文字 */
+        .status-log {
             display: none;
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 0.8rem;
-            color: var(--neon-blue);
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            padding-left: 10px;
+            border-left: 2px solid var(--neon-red);
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; text-shadow: 0 0 30px rgba(0, 243, 255, 0.8); }
-            100% { opacity: 0.8; }
-        }
-
-        /* 版权 */
+        /* 底部版权 */
         .footer {
             position: absolute;
             bottom: 20px;
             font-size: 0.6rem;
-            opacity: 0.3;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 2px;
+        }
+
+        @keyframes textFlicker {
+            0% { opacity: 0.9; }
+            5% { opacity: 0.5; }
+            10% { opacity: 0.9; }
+            50% { text-shadow: 0 0 25px rgba(0, 243, 255, 0.9); }
+            100% { opacity: 0.9; }
+        }
+
+        /* 适配极小屏幕 */
+        @media (max-height: 600px) {
+            h1 { font-size: 2rem; }
+            .panel { padding: 20px; }
+            p.subtitle { margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 背景层 -->
     <div class="bg-layer" id="bg"></div>
+    <div class="scanlines"></div>
 
-    <!-- 内容层 -->
     <div class="container">
         <h1>AlterEgo</h1>
         <p class="subtitle">未 被 选 择 的 那 条 路</p>
 
-        <div class="input-group">
-            <label>如果当时，我选择了...</label>
-            <input type="text" id="dreamInput" placeholder="例如：成为一名赛车手">
+        <div class="panel">
+            <label>/// 设定你的平行人生 ///</label>
+            <input type="text" id="dreamInput" placeholder="例如：如果我成为了职业赛车手..." autocomplete="off">
             
-            <button class="btn-glitch" onclick="generateDream()">重 启 人 生</button>
+            <button class="btn-core" onclick="startSequence()">INITIATE >></button>
             
-            <div class="loader" id="loader">
-                [系统正在介入时间线...]<br>
-                正在伪造记忆... 
+            <div class="status-log" id="statusLog">
+                [SYSTEM] 正在扫描视网膜...<br>
+                [CORE] 神经连接已建立...
             </div>
         </div>
 
-        <div class="footer">POWERED BY SORA | ARCHITECT: JINV2</div>
+        <div class="footer">SORA ENGINE | ARCHITECT: JINV2</div>
     </div>
 
     <script>
-        // 注册 Service Worker 实现 PWA 离线访问
+        // PWA 注册
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('Service Worker Registered'));
+            .catch(err => console.log('SW Load Fail', err));
         }
 
-        function generateDream() {
-            const input = document.getElementById('dreamInput').value;
-            const btn = document.querySelector('.btn-glitch');
-            const loader = document.getElementById('loader');
+        function startSequence() {
+            const input = document.getElementById('dreamInput');
+            const btn = document.querySelector('.btn-core');
+            const log = document.getElementById('statusLog');
             const bg = document.getElementById('bg');
+            const h1 = document.querySelector('h1');
 
-            if(!input) {
-                alert("请输入你想要重启的人生剧本...");
+            if(!input.value) {
+                input.style.borderColor = 'var(--neon-red)';
+                input.placeholder = ">> 请输入指令以启动 <<";
+                setTimeout(() => input.style.borderColor = '#333', 1000);
                 return;
             }
 
-            // 模拟 API 调用与视觉反馈
-            btn.style.display = 'none';
-            loader.style.display = 'block';
+            // 视觉反馈：锁定界面
+            btn.innerHTML = "PROCESSING...";
+            btn.style.opacity = "0.7";
+            btn.style.pointerEvents = "none"; // 禁止重复点击
+            log.style.display = "block";
             
-            // 背景特效：模拟穿越虫洞
-            bg.style.filter = 'brightness(1.5) blur(0px) contrast(1.2)';
-            bg.style.transform = 'scale(1.1)';
+            // 视觉特效：背景突变
+            bg.style.transform = "scale(1.2)";
+            bg.style.filter = "brightness(1.2) blur(0px) contrast(1.5)";
+            h1.style.textShadow = "0 0 30px var(--neon-red)";
 
+            // 模拟 Sora 生成过程的仪式感
+            const messages = [
+                "[0%] 正在接入时间线节点 Alpha...",
+                "[24%] 正在提取潜意识碎片...",
+                "[58%] SORA 算力核心已介入...",
+                "[82%] 正在渲染 4K 记忆影像...",
+                "[99%] 平行宇宙构建完成。"
+            ];
+
+            let step = 0;
+            const interval = setInterval(() => {
+                if(step < messages.length) {
+                    log.innerHTML += `<br>${messages[step]}`;
+                    // 自动滚动到底部
+                    // 简单的视觉抖动
+                    if(step === 2) bg.style.filter = "hue-rotate(90deg) contrast(1.5)";
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    finalize();
+                }
+            }, 800);
+        }
+
+        function finalize() {
             setTimeout(() => {
-                loader.innerHTML = "平行宇宙链接建立成功。<br>视频正在生成 (模拟演示)...";
-                // 这里在真实产品中会跳转到视频播放页
-                setTimeout(() => {
-                    alert("【系统提示】\n这是MVP演示版。\n在真实版本中，此刻Sora生成的4K视频将开始播放。");
-                    location.reload(); // 重置
-                }, 3000);
-            }, 2000);
+                alert("【系统提示】\n\n您已获得内测资格。\n但在 MVP 演示阶段，我们需要您先分享此页面以解锁完整 4K 视频。");
+                // 恢复状态，形成闭环
+                location.reload();
+            }, 1000);
         }
     </script>
 </body>
